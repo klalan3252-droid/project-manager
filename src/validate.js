@@ -14,16 +14,6 @@ function body(req) {
   return b;
 }
 
-function requiredString(b, key) {
-  if (typeof b[key] !== 'string' || b[key].trim() === '') fail(`${key} is required and must be a non-empty string`);
-  return b[key];
-}
-
-function optionalString(b, key) {
-  if (b[key] !== undefined && typeof b[key] !== 'string') fail(`${key} must be a string`);
-  return b[key];
-}
-
 function status(value) {
   if (!STATUSES.includes(value)) fail(`status must be one of ${STATUSES.join(', ')}`);
   return value;
