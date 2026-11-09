@@ -1,0 +1,377 @@
+openapi: 3.0.3
+info:
+  title: Project and Task Management API
+  version: 1.0.0
+  description: Small JSON HTTP API for managing projects and the tasks inside them. Storage is in memory.
+  contact:
+    name: API Support
+    url: https://example.com/support
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+servers:
+  - url: http://localhost:3000
+    description: Local server
+tags:
+  - name: projects
+    description: Project operations
+  - name: tasks
+    description: Task operations
+  - name: meta
+    description: API metadata
+paths:
+  /projects:
+    post:
+      tags: [projects]
+      operationId: createProject
+      summary: Create a project
+      description: Creates a project. Unknown body fields are ignored.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectCreate'
+            example:
+              name: Website redesign
+              description: Refresh the marketing site
+      responses:
+        '201':
+          description: Project created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+    get:
+      tags: [projects]
+      operationId: listProjects
+      summary: List projects
+      description: Returns all projects.
+      responses:
+        '200':
+          description: All projects.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Project'
+  /projects/{projectId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    get:
+      tags: [projects]
+      operationId: getProject
+      summary: Get a project
+      description: Returns one project.
+      responses:
+        '200':
+          description: The project.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [projects]
+      operationId: updateProject
+      summary: Update a project
+      description: Updates only the supplied fields.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProjectUpdate'
+            example:
+              name: Renamed project
+      responses:
+        '200':
+          description: The updated project.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Project'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [projects]
+      operationId: deleteProject
+      summary: Delete a project
+      description: Deletes the project and all of its tasks.
+      responses:
+        '204':
+          description: Project deleted.
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /projects/{projectId}/tasks:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+    post:
+      tags: [tasks]
+      operationId: createTask
+      summary: Create a task in a project
+      description: Creates a task. Status defaults to todo. Unknown body fields are ignored.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreate'
+            example:
+              title: Write copy
+              status: todo
+              assignee: sam
+              due_date: '2026-12-01'
+      responses:
+        '201':
+          description: Task created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    get:
+      tags: [tasks]
+      operationId: listTasks
+      summary: List a project's tasks
+      description: Returns the tasks of this project only, optionally filtered by status.
+      parameters:
+        - name: status
+          in: query
+          required: false
+          description: Only return tasks with this status.
+          schema:
+            $ref: '#/components/schemas/TaskStatus'
+      responses:
+        '200':
+          description: The project's tasks.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /projects/{projectId}/tasks/{taskId}:
+    parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      - $ref: '#/components/parameters/TaskId'
+    get:
+      tags: [tasks]
+      operationId: getTask
+      summary: Get a task
+      description: Returns one task of the project.
+      responses:
+        '200':
+          description: The task.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    patch:
+      tags: [tasks]
+      operationId: updateTask
+      summary: Update a task
+      description: Updates only the supplied fields.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskUpdate'
+            example:
+              status: done
+      responses:
+        '200':
+          description: The updated task.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      tags: [tasks]
+      operationId: deleteTask
+      summary: Delete a task
+      description: Deletes the task.
+      responses:
+        '204':
+          description: Task deleted.
+        '404':
+          $ref: '#/components/responses/NotFound'
+  /openapi.json:
+    get:
+      tags: [meta]
+      operationId: getOpenApiDocument
+      summary: Get the OpenAPI document
+      description: Returns this OpenAPI 3 document as JSON.
+      responses:
+        '200':
+          description: The OpenAPI document.
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  parameters:
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      description: Project id.
+      schema:
+        type: string
+    TaskId:
+      name: taskId
+      in: path
+      required: true
+      description: Task id.
+      schema:
+        type: string
+  responses:
+    BadRequest:
+      description: Invalid input (validation failure or malformed JSON). Nothing is created or changed.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: name is required
+    NotFound:
+      description: Unknown project or task, or the task belongs to a different project.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+          example:
+            error: project not found
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          description: Human-readable message.
+    TaskStatus:
+      type: string
+      enum: [todo, in_progress, done]
+    Project:
+      type: object
+      required: [id, name, description, created_at]
+      properties:
+        id:
+          type: string
+          example: 3f8c1d2e-0b1a-4c5d-9e6f-7a8b9c0d1e2f
+        name:
+          type: string
+          minLength: 1
+          example: Website redesign
+        description:
+          type: string
+          description: Empty string when not supplied.
+          example: Refresh the marketing site
+        created_at:
+          type: string
+          format: date-time
+          example: '2026-11-09T10:00:00.000Z'
+    ProjectCreate:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+    ProjectUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          minLength: 1
+        description:
+          type: string
+    Task:
+      type: object
+      required: [id, project_id, title, description, status, assignee, due_date, created_at]
+      properties:
+        id:
+          type: string
+          example: 7b2e4f60-1c3d-4e5f-8a9b-0c1d2e3f4a5b
+        project_id:
+          type: string
+          example: 3f8c1d2e-0b1a-4c5d-9e6f-7a8b9c0d1e2f
+        title:
+          type: string
+          minLength: 1
+          example: Write copy
+        description:
+          type: string
+          description: Empty string when not supplied.
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        assignee:
+          type: string
+          nullable: true
+          description: Null when not supplied.
+        due_date:
+          type: string
+          format: date
+          nullable: true
+          description: Null when not supplied.
+          example: '2026-12-01'
+        created_at:
+          type: string
+          format: date-time
+          example: '2026-11-09T10:05:00.000Z'
+    TaskCreate:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        assignee:
+          type: string
+        due_date:
+          type: string
+          format: date
+          description: YYYY-MM-DD.
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+          minLength: 1
+        description:
+          type: string
+        status:
+          $ref: '#/components/schemas/TaskStatus'
+        assignee:
+          type: string
+        due_date:
+          type: string
+          format: date
+          description: YYYY-MM-DD.
