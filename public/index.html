@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projects and tasks</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="site-header">
+    <h1>Project board</h1>
+    <p>Keep every project and its tasks in one place.</p>
+  </header>
+
+  <div id="error" class="banner" role="alert" hidden></div>
+
+  <main id="main" class="layout">
+    <section class="panel" aria-labelledby="projects-heading">
+      <h2 id="projects-heading" tabindex="-1">Projects</h2>
+      <p id="projects-loading" class="loading" role="status" hidden><span class="spinner" aria-hidden="true"></span>Loading projects…</p>
+      <p id="projects-empty" class="empty" hidden>No projects yet. Add your first one below.</p>
+      <ul id="project-list" class="item-list"></ul>
+
+      <form id="project-form" class="form" novalidate>
+        <h3 id="project-form-title">New project</h3>
+        <div class="field">
+          <label for="project-name">Name</label>
+          <input id="project-name" name="name" type="text" required autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="project-description">Description (optional)</label>
+          <textarea id="project-description" name="description" rows="2"></textarea>
+        </div>
+        <div class="actions">
+          <button type="submit" class="btn primary" id="project-submit">Add project</button>
+          <button type="button" class="btn" id="project-cancel" hidden>Cancel</button>
+        </div>
+      </form>
+    </section>
+
+    <section class="panel" aria-labelledby="tasks-heading">
+      <h2 id="tasks-heading" tabindex="-1">Tasks</h2>
+      <p id="tasks-prompt" class="empty">Select a project to see its tasks.</p>
+      <div id="tasks-area" hidden>
+        <p id="tasks-loading" class="loading" role="status" hidden><span class="spinner" aria-hidden="true"></span>Loading tasks…</p>
+        <p id="tasks-empty" class="empty" hidden>No tasks in this project yet. Add one below.</p>
+        <ul id="task-list" class="item-list"></ul>
+
+        <form id="task-form" class="form" novalidate>
+          <h3 id="task-form-title">New task</h3>
+          <div class="field">
+            <label for="task-title">Title</label>
+            <input id="task-title" name="title" type="text" required autocomplete="off">
+          </div>
+          <div class="field">
+            <label for="task-description">Description (optional)</label>
+            <textarea id="task-description" name="description" rows="2"></textarea>
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <label for="task-status">Status</label>
+              <select id="task-status" name="status">
+                <option value="todo">To do</option>
+                <option value="in_progress">In progress</option>
+                <option value="done">Done</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="task-assignee">Assignee (optional)</label>
+              <input id="task-assignee" name="assignee" type="text" autocomplete="off">
+            </div>
+            <div class="field">
+              <label for="task-due">Due date (optional)</label>
+              <input id="task-due" name="due_date" type="date">
+            </div>
+          </div>
+          <div class="actions">
+            <button type="submit" class="btn primary" id="task-submit">Add task</button>
+            <button type="button" class="btn" id="task-cancel" hidden>Cancel</button>
+          </div>
+        </form>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
