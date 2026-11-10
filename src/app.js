@@ -1,4 +1,5 @@
 'use strict';
+const path = require('path');
 const express = require('express');
 const { createStore } = require('./store');
 const { ValidationError } = require('./validate');
@@ -17,6 +18,9 @@ function createApp() {
   // Tasks are mounted first so /projects/:id/tasks is not shadowed by the project router.
   app.use('/projects/:projectId/tasks', taskRoutes(store, notFound));
   app.use('/projects', projects);
+
+  // Static UI: only answers GET/HEAD for files that exist, otherwise falls through to the 404 below.
+  app.use(express.static(path.join(__dirname, '..', 'public')));
 
   app.use((req, res) => res.status(404).json({ error: 'not found' }));
 
