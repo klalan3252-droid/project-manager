@@ -106,7 +106,6 @@ function editProject(p) {
 async function submitProject(event) {
   event.preventDefault();
   const name = $('project-name').value.trim();
-  if (!name) { showError(new Error('Enter a project name.')); $('project-name').focus(); return; }
   const payload = { name, description: $('project-description').value.trim() };
   await run(async () => {
     if (state.editingProject) await api('PATCH', `/projects/${encodeURIComponent(state.editingProject)}`, payload);
@@ -216,7 +215,6 @@ function editTask(t) {
 async function submitTask(event) {
   event.preventDefault();
   const title = $('task-title').value.trim();
-  if (!title) { showError(new Error('Enter a task title.')); $('task-title').focus(); return; }
   const assignee = $('task-assignee').value.trim();
   const due = $('task-due').value;
   const payload = { title, description: $('task-description').value.trim(), status: $('task-status').value };
