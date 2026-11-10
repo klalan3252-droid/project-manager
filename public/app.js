@@ -52,6 +52,14 @@ function button(label, onClick, { className = 'btn', ariaLabel } = {}) {
   return b;
 }
 
+// Put focus on the first button of the item now at `index` (or the last one), else on `fallback`.
+function focusItem(list, index, fallback) {
+  const items = list.children;
+  const item = items[Math.min(index, items.length - 1)];
+  const target = item && item.querySelector('button');
+  (target || fallback).focus();
+}
+
 // ---- Projects ----
 
 async function loadProjects() {
@@ -93,6 +101,11 @@ function resetProjectForm() {
   $('project-cancel').hidden = true;
 }
 
+function cancelProjectForm() {
+  resetProjectForm();
+  $('project-name').focus();
+}
+
 function editProject(p) {
   state.editingProject = p.id;
   $('project-name').value = p.name;
@@ -117,6 +130,7 @@ async function submitProject(event) {
 
 async function deleteProject(p) {
   if (!window.confirm(`Delete project "${p.name}" and all its tasks?`)) return;
+  const index = state.projects.findIndex((x) => x.id === p.id);
   await run(async () => {
     await api('DELETE', `/projects/${encodeURIComponent(p.id)}`);
     if (state.projectId === p.id) {
@@ -126,6 +140,7 @@ async function deleteProject(p) {
     }
     if (state.editingProject === p.id) resetProjectForm();
     await loadProjects();
+    focusItem($('project-list'), index, $('projects-heading'));
   });
 }
 
@@ -147,6 +162,8 @@ async function selectProject(id) {
   resetTaskForm();
   renderProjects();
   showTasksArea();
+  const current = document.querySelector('#project-list [aria-current]');
+  if (current) current.focus();
   await run(loadTasks);
 }
 
@@ -199,6 +216,11 @@ function resetTaskForm() {
   $('task-cancel').hidden = true;
 }
 
+function cancelTaskForm() {
+  resetTaskForm();
+  $('task-title').focus();
+}
+
 function editTask(t) {
   state.editingTask = t.id;
   $('task-title').value = t.title;
@@ -232,24 +254,28 @@ async function submitTask(event) {
 }
 
 async function completeTask(t) {
+  const index = state.tasks.findIndex((x) => x.id === t.id);
   await run(async () => {
     await api('PATCH', tasksPath(`/${encodeURIComponent(t.id)}`), { status: 'done' });
     await loadTasks();
+    focusItem($('task-list'), index, $('tasks-heading'));
   });
 }
 
 async function deleteTask(t) {
   if (!window.confirm(`Delete task "${t.title}"?`)) return;
+  const index = state.tasks.findIndex((x) => x.id === t.id);
   await run(async () => {
     await api('DELETE', tasksPath(`/${encodeURIComponent(t.id)}`));
     if (state.editingTask === t.id) resetTaskForm();
     await loadTasks();
+    focusItem($('task-list'), index, $('task-title'));
   });
 }
 
 $('project-form').addEventListener('submit', submitProject);
-$('project-cancel').addEventListener('click', resetProjectForm);
+$('project-cancel').addEventListener('click', cancelProjectForm);
 $('task-form').addEventListener('submit', submitTask);
-$('task-cancel').addEventListener('click', resetTaskForm);
+$('task-cancel').addEventListener('click', cancelTaskForm);
 
 run(loadProjects);
